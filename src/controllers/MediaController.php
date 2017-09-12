@@ -221,4 +221,41 @@ class MediaController extends Controller
             return redirect()->back()->withErrors('File upload failed.')->withInput(\Request::all());
         }
     }
+    
+    public function postFileRename()
+    {
+        $rules = [
+            //'current_dir' => 'required',
+            'rename_file' => 'required',
+            'new_file' => 'required',
+        ];
+        $validator = \Validator::make(\Request::all(), $rules);
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator->errors())->withInput(\Request::all());
+        }
+        $currentDirectory = request('current_dir', '');
+        $renameFile = request('rename_file', '');
+        $newFile = request('new_file', '');
+        
+        $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+        if ($currentDirectoryExists == false) {
+            die('Current directory DOES NOT exist');
+        }
+        
+        $renameFilePath = $currentDirectory . '/' . $renameFile;
+        $renameFileExists = Storage::disk($this->disk)->exists($renameFilePath);
+        if ($renameFileExists == false) {
+            return redirect()->back()->withErrors('File "' . $renameFile . '" DOES NOT exist.')->withInput();
+        }
+        $newFilePath = $currentDirectory . '/' . $newFile;
+        $newFileExists = Storage::disk($this->disk)->exists($newFilePath);
+        if ($newFileExists == true) {
+            return redirect()->back()->withErrors('File "' . $newFile . '" ALREADY exists.')->withInput();
+        }
+        $result = Storage::disk($this->disk)->move($renameFilePath,$newFilePath);
+        if ($result == true) {
+            return redirect(route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory))->with('flash_success', 'File "' . $renameFile . '" successfully renamed');
+        }
+        return redirect()->back()->withErrors('Renaming file "' . $renameFile . '" failed.')->withInput();
+    }
 }
