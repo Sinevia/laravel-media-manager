@@ -15,10 +15,9 @@
         }
     ],
     "autoload": {
-        "files": [""],
         "psr-4": {
             "Sinevia\\LaravelMediaManager\\": "src/"
-        },
+        }
     },
      "require": {
         "laravel/framework": "5.*"
