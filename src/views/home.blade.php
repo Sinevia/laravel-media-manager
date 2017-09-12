@@ -1,4 +1,4 @@
-@extends('media-manager.layout')
+@extends('media-manager::layout')
 
 @section('title', 'Media Manager')
 
@@ -10,7 +10,7 @@
     </div>
 <?php } ?>
 
-@if (count($errors) > 0)
+@if (isset($errors) && count($errors) > 0)
 <div class="alert alert-danger">
     <ul>
         @foreach ($errors->all() as $error)
@@ -19,7 +19,6 @@
     </ul>
 </div>
 @endif
-
 <h3>
     Media Manager
     <button class="btn btn-default pull-right" data-toggle="modal" data-target="#ModalUploadFile">
@@ -49,7 +48,7 @@
                     <span class="fa fa-folder"></span>
                 </td>
                 <td>
-                    <a href="<?php action('Admin\MediaController@getMediaManager'); ?>?current_dir=<?php echo urlencode($parentDirectory); ?>">
+                    <a href="{!! route('getMediaManager') !!}?current_dir=<?php echo urlencode($parentDirectory); ?>">
                         parent
                         <span class="fa fa-level-up"></span>
                     </a>
@@ -67,7 +66,7 @@
                     <span class="fa fa-folder"></span>
                 </td>
                 <td>
-                    <a href="<?php action('Admin\MediaController@getMediaManager'); ?>?current_dir=<?php echo urlencode($dir['dir_path']); ?>">
+                    <a href="{!! route('getMediaManager') !!}?current_dir=<?php echo urlencode($dir['dir_path']); ?>">
                         <?php echo $dir['dir_name']; ?>
                     </a>
                 </td>
@@ -138,7 +137,7 @@
                 <h4 class="modal-title" id="myModalLabel">File Upload</h4>
             </div>
             <div class="modal-body">
-                <form id="FormFileUpload" name="FormFileUpload" action="<?php echo action('Admin\MediaController@postFileUpload'); ?>" method="POST" enctype="multipart/form-data">
+                <form id="FormFileUpload" name="FormFileUpload" action="{!! route('postFileUpload') !!}" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="current_dir" value="<?php echo $currentDirectory; ?>" />
                     <input type="file" name="upload_file" value="" />
                     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>" />
@@ -162,7 +161,7 @@
                 <h4 class="modal-title" id="myModalLabel">New Directory</h4>
             </div>
             <div class="modal-body">
-                <form id="FormDirectoryCreate" name="FormDirectoryCreate" action="<?php echo action('Admin\MediaController@postDirectoryCreate'); ?>" method="POST">
+                <form id="FormDirectoryCreate" name="FormDirectoryCreate" action="{!! route('postDirectoryCreate') !!}" method="POST">
                     <div class="form-group">
                         <label>Directory name</label>
                         <input type="text" class="form-control" name="create_dir" value="" />
@@ -202,7 +201,7 @@
                 <p class="text-danger">
                     This operation is final and CANNOT BE undone!
                 </p>
-                <form id="FormDirectoryDelete" name="FormDirectoryDelete" action="<?php echo action('Admin\MediaController@postDirectoryDelete'); ?>" method="POST">
+                <form id="FormDirectoryDelete" name="FormDirectoryDelete" action="{!! route('postDirectoryDelete') !!}" method="POST">
                     <input type="hidden" name="current_dir" value="<?php echo $currentDirectory; ?>" />
                     <input type="hidden" name="delete_dir" value="" />
                     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>" />
@@ -238,7 +237,7 @@
                 <p class="text-danger">
                     This operation is final and CANNOT BE undone!
                 </p>
-                <form id="FormFileDelete" name="FormFileDelete" action="<?php echo action('Admin\MediaController@postFileDelete'); ?>" method="POST">
+                <form id="FormFileDelete" name="FormFileDelete" action="{!! route('postFileDelete') !!}" method="POST">
                     <input type="hidden" name="current_dir" value="<?php echo $currentDirectory; ?>" />
                     <input type="hidden" name="delete_file" value="" />
                     <input type="hidden" name="_token" value="<?php echo csrf_token(); ?>" />
@@ -268,7 +267,7 @@
                 <h4 class="modal-title" id="myModalLabel">File Rename</h4>
             </div>
             <div class="modal-body">
-                <form id="FormFileRename" name="FormFileRename" action="<?php echo action('Admin\MediaController@postFileRename'); ?>" method="POST">
+                <form id="FormFileRename" name="FormFileRename" action="{!! route('postFileRename') !!}" method="POST">
                     <div class="form-group">
                         <label>New Name</label>
                         <input name="new_file" value="" class="form-control" />
@@ -298,7 +297,6 @@
     $('.btn-select').hide();
     
     var openerArgs = {};
-
     function fileSelectedUrl(selectedFileUrl) {
         if (window.opener === null) {
             return true;
@@ -306,16 +304,13 @@
         window.opener.postMessage({msg: 'media-manager-file-selected', url: selectedFileUrl, args: openerArgs}, '*');
         window.close();
     }
-
     function messageReceived(event) {
         var data = event.data;
         openerArgs = data;
         console.log(data);
         $('.btn-select').show();
     }
-
     window.addEventListener("message", messageReceived, false);
-
     if (window.opener !== null) {
         window.opener.postMessage({msg: 'media-manager-loaded'}, '*');
     }

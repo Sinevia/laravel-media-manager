@@ -15,7 +15,9 @@
         }
     ],
     "autoload": {
-        "files": [""]
+        "psr-4": {
+            "LaravelMediaManager\\LaravelMediaManager\\": "src/Intervention/Image"
+        }
     },
      "require": {
         "laravel/framework": "5.*"
