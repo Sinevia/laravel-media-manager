@@ -15,9 +15,19 @@
         }
     ],
     "autoload": {
-        "files": [""]
+        "files": [""],
+        "psr-4": {
+            "Sinevia\\LaravelMediaManager\\": "src/"
+        },
     },
      "require": {
         "laravel/framework": "5.*"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Styde\\Html\\HtmlServiceProvider"
+             ]
+        }
     }
 }
