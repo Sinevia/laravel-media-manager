@@ -1,6 +1,6 @@
 <?php
 
-Route::group(['namespace' => 'Sinevia\LaravelMediaManager\Controllers'], function(){
+Route::group(['namespace' => 'Sinevia\LaravelMediaManager\Controllers','middleware' => ['web']], function(){
 	Route::get('get-media', 'MediaController@anyIndex')->name('getMedia');
 	Route::get('get-media-manager', 'MediaController@getMediaManager')->name('getMediaManager');
 	Route::post('post-file-upload', 'MediaController@postFileUpload')->name('postFileUpload');
