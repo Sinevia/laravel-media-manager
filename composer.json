@@ -26,7 +26,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Styde\\Html\\HtmlServiceProvider"
+                "Sinevia\\LaravelMediaManager\\LaravelMediaManagerServiceProvider"
              ]
         }
     }
