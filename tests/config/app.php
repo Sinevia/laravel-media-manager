@@ -144,7 +144,7 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
-        [GITHUB_NAME]\[PACKAGE_NAME]\[SERVICE_PROVIDER_CLASSNAME]::class
+        Sinevia\LaravelMediaManager\LaravelMediaManagerServiceProvider::class
     ],
 
     /*
