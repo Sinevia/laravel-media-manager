@@ -19,8 +19,17 @@
             "Sinevia\\LaravelMediaManager\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Sinevia\\LaravelMediaManager\\": "tests/"
+        }
+    },
      "require": {
         "laravel/framework": "5.*"
+    },
+    "require-dev": {        
+        "orchestra/testbench": "^3.5@dev",
+        "phpunit/phpunit": "^6.0"
     },
     "extra": {
         "laravel": {
