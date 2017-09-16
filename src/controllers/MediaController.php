@@ -5,10 +5,11 @@ namespace Sinevia\LaravelMediaManager\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Storage;
+use Validator;
+use File;
 
 class MediaController extends Controller
 {
-
     public $disk = null;
     public $filesRootDir = null;
     public $filesRootUrl = null;
@@ -17,32 +18,9 @@ class MediaController extends Controller
 
     public function __construct()
     {
-        // $this->user = \App\Helpers\AppHelper::getUser('admin');
-        // if ($this->user == null) {
-        //     die('User authentication needed to use this service');
-        //     exit;
-        // }
         $this->disk = 'media_manager';
-//        $rootDir = trim(request('root_dir', ''));
-        //        if ($rootDir == '') {
-        //            die('Root directory is required');
-        //        }
-        $this->filesRootDir = public_path('media'); //public_path() . DIRECTORY_SEPARATOR . 'files' . DIRECTORY_SEPARATOR;
+        $this->filesRootDir = public_path('media');
         $this->filesRootUrl = url('/') . '/media/';
-//        $rootDir = trim(request('root_dir', ''));
-        //        if ($rootDir == '') {
-        //            die('Root directory is required');
-        //        }
-        //        $rootDir = trim($rootDir, '/');
-        //        $rootDir = trim($rootDir, '.');
-        //        $this->fileManagerRootDir = $this->filesRootDir . $rootDir . DIRECTORY_SEPARATOR;
-        //        $this->fileManagerRootUrl = $this->filesRootUrl . $rootDir . '/';
-        //
-        //        $dirExists = Storage::disk($this->disk)->exists($this->fileManagerRootDir);
-        //
-        //        if($dirExists==false){
-        //            $result = Storage::disk($this->disk)->makeDirectory($this->fileManagerRootDir);
-        //        }
     }
 
     /**
@@ -59,7 +37,6 @@ class MediaController extends Controller
      */
     public function getMediaManager()
     {
-        // dd('Hello');
         $currentDirectory = request('current_dir', '');
         $currentDirectory = trim($currentDirectory, '/');
         $currentDirectory = trim($currentDirectory, '.');
@@ -69,8 +46,8 @@ class MediaController extends Controller
         }
         $parentDirectory = trim($parentDirectory, '/');
         $parentDirectory = trim($parentDirectory, '.');
-        $directories = Storage::disk($this->disk)->directories($currentDirectory);
-        $files = Storage::disk($this->disk)->files($currentDirectory);
+        $directories = $this->getDirectories($this->disk, $currentDirectory);
+        $files = $this->getFiles($this->disk, $currentDirectory);
         $directoryList = array();
         foreach ($directories as $dir) {
             $directoryList[] = [
@@ -97,10 +74,9 @@ class MediaController extends Controller
     public function postDirectoryCreate()
     {
         $rules = array(
-            //'current_dir' => 'required',
             'create_dir' => 'required',
         );
-        $validator = \Validator::make(\Request::all(), $rules);
+        $validator = Validator::make(\Request::all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator->errors())->withInput(\Request::all());
         }
@@ -108,17 +84,17 @@ class MediaController extends Controller
         $createDirectory = trim(request('create_dir', ''));
         /* Skip Root Directory */
         if ($currentDirectory != '') {
-            $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+            $currentDirectoryExists = $this->existsDir($this->disk, $currentDirectory);
             if ($currentDirectoryExists == false) {
                 return redirect()->back()->withErrors('Current directory DOES NOT exist.')->withInput();
             }
         }
         $createDirectoryPath = $currentDirectory . '/' . $createDirectory;
-        $createDirectoryExists = Storage::disk($this->disk)->exists($createDirectoryPath);
+        $createDirectoryExists = $this->existsDir($this->disk, $createDirectoryPath);
         if ($createDirectoryExists == true) {
             return redirect()->back()->withErrors('Directory "' . $createDirectory . '" ALREADY exists.')->withInput();
         }
-        $result = Storage::disk($this->disk)->makeDirectory($createDirectoryPath);
+        $result = $this->makeDir($this->disk, $createDirectoryPath);
         if ($result == true) {
             return redirect(route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory))->with('flash_success', 'Directory "' . $createDirectory . '" successfully created');
         }
@@ -128,25 +104,24 @@ class MediaController extends Controller
     public function postDirectoryDelete()
     {
         $rules = array(
-            //'current_dir' => 'required',
             'delete_dir' => 'required',
         );
-        $validator = \Validator::make(\Request::all(), $rules);
+        $validator = Validator::make(\Request::all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator->errors())->withInput(\Request::all());
         }
         $currentDirectory = request('current_dir', '');
         $deleteDirectory = request('delete_dir', '');
-        $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+        $currentDirectoryExists = $this->existsDir($this->disk, $currentDirectory);
         if ($currentDirectoryExists == false) {
             return redirect()->back()->withErrors('Current directory DOES NOT exist.')->withInput();
         }
         $deleteDirectoryPath = $currentDirectory . '/' . $deleteDirectory;
-        $deleteDirectoryExists = Storage::disk($this->disk)->exists($deleteDirectoryPath);
+        $deleteDirectoryExists = $this->existsDir($this->disk, $deleteDirectoryPath);
         if ($deleteDirectoryExists == false) {
             return redirect()->back()->withErrors('Directory "' . $deleteDirectory . '" DOES NOT exist.')->withInput();
         }
-        $result = Storage::disk($this->disk)->deleteDirectory($deleteDirectoryPath);
+        $result = $this->removeDir($this->disk, $deleteDirectoryPath);
         if ($result == true) {
             return redirect(route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory))->with('flash_success', 'Directory "' . $deleteDirectory . '" successfully deleted');
         }
@@ -156,25 +131,24 @@ class MediaController extends Controller
     public function postFileDelete()
     {
         $rules = array(
-            //'current_dir' => 'required',
             'delete_file' => 'required',
         );
-        $validator = \Validator::make(\Request::all(), $rules);
+        $validator = Validator::make(\Request::all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator->errors())->withInput();
         }
         $currentDirectory = request('current_dir', '');
-        $deleteFile = request('delete_file', '');
-        $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+        $deleteFile = request('delete_file', '');        
+        $currentDirectoryExists = $this->existsDir($this->disk, $currentDirectory);
         if ($currentDirectoryExists == false) {
             return redirect()->back()->withErrors('Current directory DOES NOT exist.')->withInput();
         }
         $deleteFilePath = $currentDirectory . '/' . $deleteFile;
-        $deleteFileExists = Storage::disk($this->disk)->exists($deleteFilePath);
+        $deleteFileExists = $this->existsDir($this->disk, $deleteFilePath);
         if ($deleteFileExists == false) {
             return redirect()->back()->withErrors('File "' . $deleteFile . '" DOES NOT exist.')->withInput();
         }
-        $result = Storage::disk($this->disk)->delete($deleteFilePath);
+        $result = $this->removeFile($this->disk, $deleteFilePath);
         if ($result == true) {
             return redirect(route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory))->with('flash_success', 'File "' . $deleteFile . '" successfully deleted');
         }
@@ -184,10 +158,9 @@ class MediaController extends Controller
     public function postFileUpload()
     {
         $rules = [
-            //'current_dir' => 'required',
             'upload_file' => 'required',
         ];
-        $validator = \Validator::make(\Request::all(), $rules);
+        $validator = Validator::make(\Request::all(), $rules);
         if ($validator->fails()) {
             return redirect()->back()->withErrors($validator->errors())->withInput(\Request::all());
         }
@@ -195,7 +168,7 @@ class MediaController extends Controller
             return redirect()->back()->withErrors('Upload file is invalid.')->withInput(\Request::all());
         }
         $currentDirectory = request('current_dir', '');
-        $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+        $currentDirectoryExists = $this->existsDir($this->disk, $currentDirectory);
         if ($currentDirectoryExists == false) {
             die('Current directory DOES NOT exist');
         }
@@ -213,8 +186,8 @@ class MediaController extends Controller
         }
         try {
             $file = \Request::file('upload_file');
-            Storage::disk($this->disk)->put($destinationPath . '/' . $fileName, \File::get($file));
-            //\Request::file('upload_file')->move($destinationPath, $fileName);
+            $dPath = $destinationPath . '/' . $fileName;
+            $this->uploadFile($this->disk, $dPath, File::get($file));
             $redirectUrl = route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory);
             return redirect($redirectUrl)->with('flash_success', 'File "' . $fileName . '" successfully uploaded');
         } catch (\Exception $e) {
@@ -237,25 +210,65 @@ class MediaController extends Controller
         $renameFile = request('rename_file', '');
         $newFile = request('new_file', '');
         
-        $currentDirectoryExists = Storage::disk($this->disk)->exists($currentDirectory);
+        $currentDirectoryExists = $this->existsDir($this->disk, $currentDirectory);
         if ($currentDirectoryExists == false) {
             die('Current directory DOES NOT exist');
         }
         
         $renameFilePath = $currentDirectory . '/' . $renameFile;
-        $renameFileExists = Storage::disk($this->disk)->exists($renameFilePath);
+        $renameFileExists = $this->existsDir($this->disk, $renameFilePath);
         if ($renameFileExists == false) {
             return redirect()->back()->withErrors('File "' . $renameFile . '" DOES NOT exist.')->withInput();
         }
         $newFilePath = $currentDirectory . '/' . $newFile;
-        $newFileExists = Storage::disk($this->disk)->exists($newFilePath);
+        $newFileExists = $this->existsDir($this->disk, $newFilePath);
         if ($newFileExists == true) {
             return redirect()->back()->withErrors('File "' . $newFile . '" ALREADY exists.')->withInput();
         }
-        $result = Storage::disk($this->disk)->move($renameFilePath,$newFilePath);
+        $result = $this->renameFile($this->disk,$renameFilePath, $newFilePath);
         if ($result == true) {
             return redirect(route('getMediaManager') . '?current_dir=' . urlencode($currentDirectory))->with('flash_success', 'File "' . $renameFile . '" successfully renamed');
         }
         return redirect()->back()->withErrors('Renaming file "' . $renameFile . '" failed.')->withInput();
+    }
+
+    public function makeDir($disk, $dirName)
+    {
+        return Storage::disk($disk)->makeDirectory($dirName);
+    }
+
+    public function removeDir($disk, $dirName)
+    {
+        return Storage::disk($disk)->deleteDirectory($dirName);
+    }
+
+    public function existsDir($disk, $dirName)
+    {
+        return Storage::disk($disk)->exists($dirName);
+    }
+
+    public function removeFile($disk, $fileName)
+    {
+        return Storage::disk($disk)->delete($fileName);
+    }
+
+    public function uploadFile($disk, $destinationPath, $file)
+    {
+        return Storage::disk($disk)->put($destinationPath, $file);
+    }
+
+    public function renameFile($disk, $oldFile, $newFile)
+    {
+        return Storage::disk($disk)->move($oldFile, $newFile);
+    }
+
+    public function getDirectories($disk, $path)
+    {
+        return Storage::disk($disk)->directories($path);
+    }
+
+    public function getFiles($disk, $path)
+    {
+        return Storage::disk($disk)->files($path);
     }
 }
