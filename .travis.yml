@@ -2,3 +2,17 @@ language: php
 php:
   - '7.0'
   - '7.1'
+before_install:
+  - composer self-update
+  - composer create-project laravel/laravel
+  - cd ./laravel
+  - composer config repositories.Sinevia vcs https://github.com/Sinevia/laravel-media-manager.git
+  - composer require Sinevia/laravel-media-manager dev-master
+  - composer update
+  - cp ./vendor/Sinevia/laravel-media-manager/tests/config/.env ./
+  - rm ./config/app.php
+  - cp ./vendor/Sinevia/laravel-media-manager/tests/config/app.php ./config
+  - php artisan vendor:publish
+  - cd ./vendor/Sinevia/laravel-media-manager
+  
+script: "phpunit"
