@@ -3,6 +3,7 @@ php:
   - '7.0'
   #- '7.1'
 before_install:
+  - composer config --global github-protocols 'https'
   - composer self-update
   - composer install
   - composer create-project laravel/laravel
