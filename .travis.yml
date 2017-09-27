@@ -4,12 +4,11 @@ php:
   #- '7.1'
 before_install:
   - composer self-update
-  - composer install
   - composer config --global github-protocols https
-  - composer create-project --prefer-dist --no-interaction --stability=dev laravel/laravel
+  - composer create-project laravel/laravel
   - cd ./laravel
   - composer config repositories.Sinevia vcs https://github.com/Sinevia/laravel-media-manager.git
-  - composer require Sinevia/laravel-media-manager dev-master
+  - composer require Sinevia/laravel-media-manager dev-master --prefer-dist --no-interaction
   - composer update
   - cp ./vendor/Sinevia/laravel-media-manager/tests/config/.env ./
   - rm ./config/app.php
