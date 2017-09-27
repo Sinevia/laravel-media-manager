@@ -11,7 +11,7 @@ before_install:
   - composer require Sinevia/laravel-media-manager dev-master --prefer-dist --no-interaction
   - composer update
   - cp ./vendor/Sinevia/laravel-media-manager/tests/config/.env ./
-  - rm ./config/app.php
+  # - rm ./config/app.php
   - cp ./vendor/Sinevia/laravel-media-manager/tests/config/app.php ./config
   - php artisan vendor:publish
   - cd ./vendor/Sinevia/laravel-media-manager
