@@ -8,7 +8,7 @@ before_install:
   - composer install
   - composer create-project laravel/laravel
   - cd ./laravel
-  - composer config repositories.Sinevia vcs https://github.com/Sinevia/laravel-media-manager.git
+  - composer config repositories vcs https://github.com/Sinevia/laravel-media-manager.git
   - composer require Sinevia/laravel-media-manager dev-master
   - composer update
   - cp ./vendor/Sinevia/laravel-media-manager/tests/config/.env ./
