@@ -1,7 +1,6 @@
 {
     "name": "Sinevia/laravel-media-manager",
     "description": "Media manager for Laravel - browse / create / rename / delete files and folders.",
-    "version": "1.0.0",
     "type": "library",
     "keywords": ["media", "manager", "laravel", "php", "Sinevia"],    
     "homepage": "https://github.com/Sinevia/laravel-media-manager",
