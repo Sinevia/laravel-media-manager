@@ -1,5 +1,5 @@
 {
-    "name": "Sinevia/laravel-media-manager",
+    "name": "sinevia/laravel-media-manager",
     "description": "Media manager for Laravel - browse / create / rename / delete files and folders.",
     "type": "library",
     "keywords": ["media", "manager", "laravel", "php", "Sinevia"],    
