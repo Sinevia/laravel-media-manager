@@ -23,7 +23,7 @@ Step 1. Create a new directory in your public directory called media
 Step 2. Create a new entry in your filesystems.php config file
 
 ```
-'media-manager' => [
+'media_manager' => [
     'driver' => 'local',
     'root' => public_path('media'),
     'visibility' => 'public',
@@ -31,3 +31,9 @@ Step 2. Create a new entry in your filesystems.php config file
 ```
 
 Step 3. Add a new entry in your routers file
+
+```
+Route::group(['middleware' => ['admin-only-middleware']], function () {
+    AdvancedRoute::controller('/media', '\Sinevia\LaravelMediaManager\Controllers\MediaController');
+});
+```
