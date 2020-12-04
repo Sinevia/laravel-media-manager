@@ -2,8 +2,14 @@
 
 ## Installation ##
 
+- Composer
+
+```
+composer require sinevia/laravel-media-manager
+```
 
 - Manual. To dev-master (for development only)
+
 ```
 "repositories": [
    {
@@ -14,7 +20,6 @@
 "require": {
     "Sinevia/laravel-media-manager": "dev-master"
 },
-
 ```
 
 ## Configuration ##
