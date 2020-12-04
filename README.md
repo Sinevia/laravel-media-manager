@@ -2,6 +2,8 @@
 
 ## Installation ##
 
+
+- Manual. To dev-master (for development only)
 ```
 "repositories": [
    {
